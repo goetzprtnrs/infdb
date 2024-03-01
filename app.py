@@ -24,16 +24,16 @@ external_stylesheets = [
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Beispiel-Datensätze einlesen
-df_weichen = pd.read_excel('./data/2022_2105-V_Stueckliste_Weichen.xlsx')
-df_bruecken = pd.read_excel('./data/2022_2106-V_Stueckliste_Bruecken.xlsx')
-df_tunnel = pd.read_excel('./data/2022_2108-V_Stueckliste_Tunnel.xlsx')
-df_stuetzbauwerke = pd.read_excel('./data/2022_2110-V_Stueckliste_Stuetzbauwerke_Bauwerksklasse(BWK)3.xlsx')
-df_schallschutzwande = pd.read_excel('./data/2022_2111-V_Stueckliste_Schallschutzwaende.xlsx')
-df_bahnubergange = pd.read_excel('./data/2022_2112-V_Stueckliste_Bahnuebergaenge.xlsx')
-df_GSL = pd.read_excel('./data/2022_2101-V_Gesamtstreckenliste(GSL).xlsx')
-df_ETCS = pd.read_excel('./data/ETCS_heute_und_geplant.xlsx')
-df_Traffic = pd.read_excel('./data/StrNr_Average_Anual_Traffic_Flow.xlsx')
-df_HLK_Zeitraum = pd.read_excel('./data/StrNr_HLK_Zeitraum.xlsx')
+df_weichen = pd.read_excel(r'.\data\2022_2105-V_Stueckliste_Weichen.xlsx')
+df_bruecken = pd.read_excel(r'.\data\2022_2106-V_Stueckliste_Bruecken.xlsx')
+df_tunnel = pd.read_excel(r'.\data\2022_2108-V_Stueckliste_Tunnel.xlsx')
+df_stuetzbauwerke = pd.read_excel(r'.\data\2022_2110-V_Stueckliste_Stuetzbauwerke_Bauwerksklasse(BWK)3.xlsx')
+df_schallschutzwande = pd.read_excel(r'.\data\2022_2111-V_Stueckliste_Schallschutzwaende.xlsx')
+df_bahnubergange = pd.read_excel(r'.\data\2022_2112-V_Stueckliste_Bahnuebergaenge.xlsx')
+df_GSL = pd.read_excel(r'.\data\2022_2101-V_Gesamtstreckenliste(GSL).xlsx')
+df_ETCS = pd.read_excel(r'.\data\ETCS_heute_und_geplant.xlsx')
+df_Traffic = pd.read_excel(r'.\data\StrNr_Average_Anual_Traffic_Flow.xlsx')
+df_HLK_Zeitraum = pd.read_excel(r'.\data\StrNr_HLK_Zeitraum.xlsx')
 
 # Pfad zu den Excel-Dateien
 file_path_bu = r'.\data\20240229_Matching_2112-V_Stueckliste_Bahnuebergaenge_vClean.xlsx'
