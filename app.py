@@ -25,15 +25,15 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # Beispiel-Datensätze einlesen
 df_weichen = pd.read_excel('./data/2022_2105-V_Stueckliste_Weichen.xlsx')
-df_bruecken = pd.read_excel('./2022_2106-V_Stueckliste_Bruecken.xlsx')
-df_tunnel = pd.read_excel('./2022_2108-V_Stueckliste_Tunnel.xlsx')
-df_stuetzbauwerke = pd.read_excel('./2022_2110-V_Stueckliste_Stuetzbauwerke_Bauwerksklasse(BWK)3.xlsx')
-df_schallschutzwande = pd.read_excel('./2022_2111-V_Stueckliste_Schallschutzwaende.xlsx')
-df_bahnubergange = pd.read_excel('./2022_2112-V_Stueckliste_Bahnuebergaenge.xlsx')
-df_GSL = pd.read_excel('./2022_2101-V_Gesamtstreckenliste(GSL).xlsx')
-df_ETCS = pd.read_excel('./ETCS_heute_und_geplant.xlsx')
-df_Traffic = pd.read_excel('./StrNr_Average_Anual_Traffic_Flow.xlsx')
-df_HLK_Zeitraum = pd.read_excel('./StrNr_HLK_Zeitraum.xlsx')
+df_bruecken = pd.read_excel('./data/2022_2106-V_Stueckliste_Bruecken.xlsx')
+df_tunnel = pd.read_excel('./data/2022_2108-V_Stueckliste_Tunnel.xlsx')
+df_stuetzbauwerke = pd.read_excel('./data/2022_2110-V_Stueckliste_Stuetzbauwerke_Bauwerksklasse(BWK)3.xlsx')
+df_schallschutzwande = pd.read_excel('./data/2022_2111-V_Stueckliste_Schallschutzwaende.xlsx')
+df_bahnubergange = pd.read_excel('./data/2022_2112-V_Stueckliste_Bahnuebergaenge.xlsx')
+df_GSL = pd.read_excel('./data/2022_2101-V_Gesamtstreckenliste(GSL).xlsx')
+df_ETCS = pd.read_excel('./data/ETCS_heute_und_geplant.xlsx')
+df_Traffic = pd.read_excel('./data/StrNr_Average_Anual_Traffic_Flow.xlsx')
+df_HLK_Zeitraum = pd.read_excel('./data/StrNr_HLK_Zeitraum.xlsx')
 
 # Pfad zu den Excel-Dateien
 file_path_bu = r'.\data\20240229_Matching_2112-V_Stueckliste_Bahnuebergaenge_vClean.xlsx'
@@ -45,12 +45,6 @@ df_bu = pd.read_excel(file_path_bu)
 df_br = pd.read_excel(file_path_br)
 df_tu = pd.read_excel(file_path_tu)
 
-df_bu_dropdown = pd.read_excel(file_path_bu)
-
-
-df_bu = df_bu[df_bu['STR_NR']==4010]
-df_br = df_br[df_br['STR_NR']==4010]
-df_tu = df_tu[df_tu['STR_NR']==4010]
 
 pio.renderers.default = 'browser'
 
@@ -59,8 +53,6 @@ mapbox_access_token = 'pk.eyJ1IjoiYW5ka29jaDkzIiwiYSI6ImNsMTZiNnU4dTE5MzQzY3MwZn
 
 
 
-# Erstellen der Figur
-fig = go.Figure()
 
 # Für Bahnübergänge (df_bu)
 hover_text_bu = df_bu.apply(lambda row: f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>LAGE_KM: {row['LAGE_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>BAUFORM: {row['BAUFORM']}<br>UEB_WACH_ART: {row['UEB_WACH_ART']}<br>ZUGGEST: {row['ZUGGEST']}", axis=1)
@@ -78,69 +70,6 @@ df_tu_geo = gpd.GeoDataFrame(df_tu, geometry='geometry')
 
 
 
-# Datainklusion 1
-fig.add_trace(go.Scattermapbox(
-    lat=df_bu['breite'],
-    lon=df_bu['länge'],
-    mode='markers',
-    marker=dict(size=5, color='#AAD228'),
-    hoverinfo='text',
-    hovertext=hover_text_bu,
-    name='Bahnübergänge'
-))
-
-# Datainklusion 2
-
-fig.add_trace(go.Scattermapbox(
-    lat=df_br['GEOGR_BREITE'],
-    lon=df_br['GEOGR_LAENGE'],
-    mode='markers',
-    marker=dict(size=5, color='#006587'),
-    hoverinfo='text',
-    hovertext=hover_text_br,
-    name='Brücken'
-))
-
-# Datainklusion 3 
-
-lons = []
-lats = []
-hover_texts = []
-
-for index, row in df_tu_geo.iterrows():
-    x, y = row['geometry'].xy
-    lons.extend(x.tolist() + [None])  # Add None at the end of each line string
-    lats.extend(y.tolist() + [None])  # Add None at the end of each line string
-    # Add hover text for each segment
-    hover_texts.extend([f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>VON_KM: {row['VON_KM']}<br>BIS_KM: {row['BIS_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>LAENGE: {row['LAENGE']}<br>ANZ_STR_GL: {row['ANZ_STR_GL']}<br>QUERSCHN: {row['QUERSCHN']}<br>BAUWEISE: {row['BAUWEISE']}"] * len(x))
-    # No need to add None again at the end since it's already added with coordinates
-
-# Add a single trace for all tunnel line segments
-fig.add_trace(go.Scattermapbox(
-    mode="lines",
-    lon=lons,
-    lat=lats,
-    hovertext=hover_texts,
-    hoverinfo="text",
-    line=dict(color='#969696', width=5),
-    name='Tunnel'  # Give a name to this trace for the legend
-))
-
-
-
-# Continue with updating the layout and showing the figure as before
-fig.update_layout(
-    mapbox=dict(
-        accesstoken=mapbox_access_token,
-        center={"lat": 51.1657, "lon": 10.4515},
-        zoom=5.5,
-        style='outdoors'
-    ),
-    showlegend=True,
-    title="Geoplot der DB Bahnübergänge, Brücken und Tunnel"
-)
-
-# Ende Plot
 
 
 
@@ -312,7 +241,8 @@ def display_page(pathname):
                     dcc.Input(
                         id='STR_NR-filter',
                         type='text',
-                        placeholder='Geben Sie STR_NR ein'
+                        placeholder='Geben Sie STR_NR ein',
+                        value = '4010'
                     )
                 ], style={'marginBottom': '40px'}),
 
@@ -350,7 +280,7 @@ def display_page(pathname):
                     page_size=8,  # Anzeigen der obersten 8 Einträge pro Seite
                     page_action='native'  # Benutzerdefinierte Seitennavigation
                 ),
-                dcc.Graph(figure = fig, style={'height': '80vh', 'width': '100%'})
+                dcc.Graph(id='graph-content', style={'height': '80vh', 'width': '100%'} )
             ]
         else:
             return html.Div([
@@ -361,10 +291,15 @@ def display_page(pathname):
 
 # Callback für die Aktualisierung der Tabelle basierend auf dem RadioItems-Wert und dem ausgewählten Datensatz
 @app.callback(
-    Output('table-content', 'columns'),
+    Output('table-content', 'columns'), 
     Output('table-content', 'data'),
+    Output('graph-content', 'figure'),
     [Input('dataset-radio', 'value'),
-     Input('STR_NR-filter', 'value')]
+     Input('STR_NR-filter', 'value')
+     ]
+
+
+    
 )
 def update_table(selected_dataset, STR_NR_filter):
     df = None
@@ -386,8 +321,83 @@ def update_table(selected_dataset, STR_NR_filter):
 
     columns = [{'name': i, 'id': i} for i in df.columns] if df is not None else []
     data = df.to_dict('records') if df is not None else []
+    print(df_bu)
 
-    return columns, data
+    df_bu_new = df_bu[df_bu['STR_NR']==int(STR_NR_filter)]
+    df_br_new = df_br[df_br['STR_NR']==int(STR_NR_filter)]
+    df_tu_new = df_tu_geo[df_tu_geo['STR_NR']==int(STR_NR_filter)]
+    print(df_bu_new['STR_NR'])
+
+    fig = go.Figure()
+    
+
+    # Datainklusion 1
+
+    fig.add_trace(go.Scattermapbox(
+        lat=df_bu_new['breite'],
+        lon=df_bu_new['länge'],
+        mode='markers',
+        marker=dict(size=5, color='#AAD228'),
+        hoverinfo='text',
+        hovertext=hover_text_bu,
+        name='Bahnübergänge',
+        showlegend=True,
+    ))
+
+    # Datainklusion 2
+
+    fig.add_trace(go.Scattermapbox(
+        lat=df_br_new['GEOGR_BREITE'],
+        lon=df_br_new['GEOGR_LAENGE'],
+        mode='markers',
+        marker=dict(size=5, color='#006587'),
+        hoverinfo='text',
+        hovertext=hover_text_br,
+        name='Brücken',
+        showlegend=True,
+    ))
+
+    # Datainklusion 3 
+
+    lons = []
+    lats = []
+    hover_texts = []
+
+    for index, row in df_tu_new.iterrows():
+        x, y = row['geometry'].xy
+        lons.extend(x.tolist() + [None])  # Add None at the end of each line string
+        lats.extend(y.tolist() + [None])  # Add None at the end of each line string
+        # Add hover text for each segment
+        hover_texts.extend([f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>VON_KM: {row['VON_KM']}<br>BIS_KM: {row['BIS_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>LAENGE: {row['LAENGE']}<br>ANZ_STR_GL: {row['ANZ_STR_GL']}<br>QUERSCHN: {row['QUERSCHN']}<br>BAUWEISE: {row['BAUWEISE']}"] * len(x))
+        # No need to add None again at the end since it's already added with coordinates
+
+    # Add a single trace for all tunnel line segments
+    fig.add_trace(go.Scattermapbox(
+        mode="lines",
+        lon=lons,
+        lat=lats,
+        hovertext=hover_texts,
+        hoverinfo="text",
+        line=dict(color='#969696', width=5),
+        name='Tunnel',  # Give a name to this trace for the legend,
+        showlegend=True,
+    ))
+
+
+
+    # Continue with updating the layout and showing the figure as before
+    fig.update_layout(
+        mapbox=dict(
+            accesstoken=mapbox_access_token,
+            center={"lat": 51.1657, "lon": 10.4515},
+            zoom=5.5,
+            style='outdoors'
+        ),
+        showlegend=True,
+        title="Geoplot der DB Bahnübergänge, Brücken und Tunnel"
+    )
+
+    return columns, data, fig
 
 # Callback für die Aktualisierung der df_GSL-Tabelle basierend auf dem STR_NR-Filter
 @app.callback(
