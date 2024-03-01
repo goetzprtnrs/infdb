@@ -22,6 +22,7 @@ external_stylesheets = [
 
 # Initialize the Dash app with external stylesheets
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 # Beispiel-Datensätze einlesen
 df_weichen = pd.read_excel(r'.\data\2022_2105-V_Stueckliste_Weichen.xlsx')
