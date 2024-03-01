@@ -24,6 +24,9 @@ external_stylesheets = [
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
+file_path_br = 'https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_Bruecken_vClean.xlsx'
+df_br = pd.read_excel(file_path_br)
+
 # Beispiel-Datensätze einlesen
 df_weichen = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2105-V_Stueckliste_Weichen.xlsx')
 df_bruecken = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2106-V_Stueckliste_Bruecken.xlsx')
@@ -38,12 +41,12 @@ df_HLK_Zeitraum = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/i
 
 # Pfad zu den Excel-Dateien
 file_path_bu = 'https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_2112-V_Stueckliste_Bahnuebergaenge_vClean.xlsx'
-file_path_br = 'https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_Brücken_vClean.xlsx'
+
 file_path_tu = 'https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_Tunnel_vClean.xlsx'
 
 
 df_bu = pd.read_excel(file_path_bu)
-df_br = pd.read_excel(file_path_br)
+
 df_tu = pd.read_excel(file_path_tu)
 
 
