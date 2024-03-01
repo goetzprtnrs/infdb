@@ -325,12 +325,10 @@ def update_table(selected_dataset, STR_NR_filter):
 
     columns = [{'name': i, 'id': i} for i in df.columns] if df is not None else []
     data = df.to_dict('records') if df is not None else []
-    print(df_bu)
 
     df_bu_new = df_bu[df_bu['STR_NR']==int(STR_NR_filter)]
     df_br_new = df_br[df_br['STR_NR']==int(STR_NR_filter)]
     df_tu_new = df_tu_geo[df_tu_geo['STR_NR']==int(STR_NR_filter)]
-    print(df_bu_new['STR_NR'])
 
     fig = go.Figure()
     
