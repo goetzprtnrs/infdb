@@ -56,17 +56,6 @@ pio.renderers.default = 'browser'
 mapbox_access_token = 'pk.eyJ1IjoiYW5ka29jaDkzIiwiYSI6ImNsMTZiNnU4dTE5MzQzY3MwZnV1NjVqOGoifQ.ZxCDeRkr59lifDEm4PIWQA'
 
 
-
-
-# Für Bahnübergänge (df_bu)
-hover_text_bu = df_bu.apply(lambda row: f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>LAGE_KM: {row['LAGE_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>BAUFORM: {row['BAUFORM']}<br>UEB_WACH_ART: {row['UEB_WACH_ART']}<br>ZUGGEST: {row['ZUGGEST']}", axis=1)
-
-# Für Brücken (df_br)
-hover_text_br = df_br.apply(lambda row: f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>VON_KM: {row['VON_KM']}<br>BIS_KM: {row['BIS_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>BR_BEZ: {row['BR_BEZ']}<br>BAUART: {row['BAUART']}<br>ZUST_KAT: {row['ZUST_KAT']}", axis=1)
-
-# Für Tunnel (df_tu)
-hover_text_tu = df_tu.apply(lambda row: f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>VON_KM: {row['VON_KM']}<br>BIS_KM: {row['BIS_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>LAENGE: {row['LAENGE']}<br>ANZ_STR_GL: {row['ANZ_STR_GL']}<br>QUERSCHN: {row['QUERSCHN']}<br>BAUWEISE: {row['BAUWEISE']}", axis=1)
-
 # GeoDataFrame
 df_tu = df_tu[df_tu['geometry'].notna()]
 df_tu['geometry'] = df_tu['geometry'].apply(wkt.loads)
@@ -329,6 +318,17 @@ def update_table(selected_dataset, STR_NR_filter):
     df_bu_new = df_bu[df_bu['STR_NR']==int(STR_NR_filter)]
     df_br_new = df_br[df_br['STR_NR']==int(STR_NR_filter)]
     df_tu_new = df_tu_geo[df_tu_geo['STR_NR']==int(STR_NR_filter)]
+
+    # Für Bahnübergänge (df_bu)
+    hover_text_bu = df_bu_new.apply(lambda row: f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>LAGE_KM: {row['LAGE_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>BAUFORM: {row['BAUFORM']}<br>UEB_WACH_ART: {row['UEB_WACH_ART']}<br>ZUGGEST: {row['ZUGGEST']}", axis=1)
+
+    # Für Brücken (df_br)
+    hover_text_br = df_br_new.apply(lambda row: f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>VON_KM: {row['VON_KM']}<br>BIS_KM: {row['BIS_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>BR_BEZ: {row['BR_BEZ']}<br>BAUART: {row['BAUART']}<br>ZUST_KAT: {row['ZUST_KAT']}", axis=1)
+
+    # Für Tunnel (df_tu)
+    #hover_text_tu = df_tu_new.apply(lambda row: f"REGION: {row['REGION']}<br>NETZ: {row['NETZ']}<br>STR_NR: {row['STR_NR']}<br>VON_KM: {row['VON_KM']}<br>BIS_KM: {row['BIS_KM']}<br>RIKZ: {row['RIKZ']}<br>RIL_100: {row['RIL_100']}<br>LAENGE: {row['LAENGE']}<br>ANZ_STR_GL: {row['ANZ_STR_GL']}<br>QUERSCHN: {row['QUERSCHN']}<br>BAUWEISE: {row['BAUWEISE']}", axis=1)
+
+
 
     fig = go.Figure()
     
