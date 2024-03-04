@@ -1,7 +1,6 @@
 import dash
 from dash import html, dcc, callback, Output, Input 
-import dash_core_components as dcc
-import dash_html_components as html
+import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import urllib.parse
 import pandas as pd
@@ -20,34 +19,30 @@ external_stylesheets = [
     'https://codepen.io/chriddyp/pen/bWLwgP.css'
 ]
 
-# Initialize the Dash app with external stylesheets
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# Definieren der Dash-App mit external_stylesheets
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 server = app.server
 
-file_path_br = 'https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_Bruecken_vClean.xlsx'
-df_br = pd.read_excel(file_path_br)
+df_weichen = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2105-V_Stueckliste_Weichen.pickle')
+df_bruecken = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2106-V_Stueckliste_Bruecken.pickle')
+df_tunnel = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2108-V_Stueckliste_Tunnel.pickle')
+df_stuetzbauwerke = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2110-V_Stueckliste_Stuetzbauwerke_Bauwerksklasse(BWK)3.pickle')
+df_schallschutzwande = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2111-V_Stueckliste_Schallschutzwaende.pickle')
+df_bahnubergange = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2112-V_Stueckliste_Bahnuebergaenge.pickle')
+df_GSL = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2101-V_Gesamtstreckenliste(GSL).pickle')
+df_ETCS = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/ETCS_heute_und_geplant.pickle')
+df_Traffic = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/StrNr_Average_Anual_Traffic_Flow.pickle')
+df_HLK_Zeitraum = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/StrNr_HLK_Zeitraum.pickle')
+df_br = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_Bruecken_vClean.pickle')
+df_bu = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_2112-V_Stueckliste_Bahnuebergaenge_vClean.pickle')
+df_tu = pd.read_pickle('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_Tunnel_vClean.pickle')
 
-# Beispiel-Datensätze einlesen
-df_weichen = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2105-V_Stueckliste_Weichen.xlsx')
-df_bruecken = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2106-V_Stueckliste_Bruecken.xlsx')
-df_tunnel = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2108-V_Stueckliste_Tunnel.xlsx')
-df_stuetzbauwerke = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2110-V_Stueckliste_Stuetzbauwerke_Bauwerksklasse(BWK)3.xlsx')
-df_schallschutzwande = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2111-V_Stueckliste_Schallschutzwaende.xlsx')
-df_bahnubergange = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2112-V_Stueckliste_Bahnuebergaenge.xlsx')
-df_GSL = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/2022_2101-V_Gesamtstreckenliste(GSL).xlsx')
-df_ETCS = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/ETCS_heute_und_geplant.xlsx')
-df_Traffic = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/StrNr_Average_Anual_Traffic_Flow.xlsx')
-df_HLK_Zeitraum = pd.read_excel('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/StrNr_HLK_Zeitraum.xlsx')
+# HLK-Klarnamen je Streckennummer
+hlk_timetable = pd.read_csv('https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/StrNr_HLK_Zeitraum2.csv', encoding = "'latin-1", sep=";")
+streckennummern_listen = hlk_timetable['Streckennummer'].apply(lambda x: [int(num) for num in x.split(',')] if ',' in x else [int(x)]).tolist()
+hlk_timetable = hlk_timetable.assign(Streckennummern_Liste=streckennummern_listen)
+test_dict = dict(zip(hlk_timetable["HLK Name"], hlk_timetable["Streckennummern_Liste"]))
 
-# Pfad zu den Excel-Dateien
-file_path_bu = 'https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_2112-V_Stueckliste_Bahnuebergaenge_vClean.xlsx'
-
-file_path_tu = 'https://raw.githubusercontent.com/goetzprtnrs/infdb/main/data/20240229_Matching_Tunnel_vClean.xlsx'
-
-
-df_bu = pd.read_excel(file_path_bu)
-
-df_tu = pd.read_excel(file_path_tu)
 
 
 pio.renderers.default = 'browser'
@@ -86,148 +81,178 @@ df_GSL = df_GSL.merge(df_ETCS, on='STR_NR', how='outer')
 df_GSL = df_GSL.merge(df_Traffic, on='STR_NR', how='outer')
 df_GSL = df_GSL.merge(df_HLK_Zeitraum, on='STR_NR', how='outer')
 
-# Function to create cards with enhanced shadows
+
+
+# Seitenbeschreibungen
+page_descriptions = {
+    'HLK-Auswertung': 'Mit der HLK-Auswertung haben sie Überblick über 40 HLK Generalsanierungen. Diese können mit einem Dropdown Menü ausgewählt und ausgewertet werden. So stehen Ihnen Informationen zu den Anlagen und Strecken zu Verfügung, welche geographisch visualisiert werden.',
+    'Inspektor Infrastruktur-Bestandsdaten': 'Mit dem Inspektor Infrastruktur-Bestandsdaten können Sie sich Details zu Strecken und Anlagen sowohl tabellarisch als auch geographisch anzeigen lassen.',
+    'Geo-Visualisierung': 'Die Geo-Visualisierung ermöglicht die geographische Visualisierung von Anlagen.',
+    'Personenbahnhöfe': 'Hier erhalten Sie Informationen über Personenbahnhöfe und deren Eigenschaften. Zu diesen zählen Bahnsteiglänge und Barrierefreiheit sowie Informationen zu Zukunftsbahnhöfen.'
+}
+
+
+# Funktion zum Erstellen von Karten
 def create_card(number, title):
-    # Convert title to URL-safe format
     title_url = urllib.parse.quote(title)
-    return dcc.Link(
-        html.Div(
-            html.Div([
-                html.H3(number, style={'fontSize': '60px', 'margin': '0', 'flexShrink': '0'}),
-                html.P(title, style={'fontSize': '36px', 'margin': '0', 'marginLeft': '15px'}),
-            ], style={'display': 'flex', 'alignItems': 'center', 'justifyContent': 'start'}, className="card-body"),
-            className="card",
-            style={
-                'borderRadius': '15px',
-                'boxShadow': '2px 2px 3px 3px grey',
-                'textAlign': 'left',
-                'height': '80px',
-                'marginBottom': '40px',
-                'padding': '20px',
-                'marginTop': '20px'
-            }
+    card_content = dbc.CardBody(
+        [
+            html.H3(number, className="card-title", style={'color': '#00ffff', 'marginRight': '15px','fontSize': '40px'}),
+            html.P(title, className="card-text", style={'fontSize': '20px'}),
+        ],
+        style={'display': 'flex', 'alignItems': 'center'}
+    )
+
+    return html.Div(
+        dcc.Link(
+            dbc.Card(
+                card_content,
+                color="light",
+                inverse=False,
+                style={
+                    "width": "95%", 
+                    'height': '100px',  # Erhöhte Höhe der Karte
+                    'margin': '10px auto', 
+                    'textDecoration': 'none',
+                    'boxShadow': '0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19)'  # Schatten-Effekt
+                }
+            ),
+            href=f'/{title_url}',
+            style={'textDecoration': 'none', 'color': 'inherit'}
         ),
-        href=f'/{title_url}',
-        style={'textDecoration': 'none', 'color': 'inherit'}
+        style={'width': '100%'}
     )
 
 
+
 # Reusable function for creating styled headings
-def create_styled_heading(text, include_search=False):  # Add parameter
-    return html.Div([
-        html.Div([
-            html.H1(text, style={'color': '#fff', 'marginBottom': '10px'}),
-            # Search box (conditional)
-            dcc.Input(
-                id='search-box', 
-                type='text', 
-                placeholder='Datenbank durchsuchen...', 
-                style={
-                    'width': '85%',   
-                    'backgroundColor': 'white',
-                    'borderRadius': '5px',
-                    'border': 'none',
-                    'padding': '10px' 
-                }
-            ) if include_search else None  # Only include if needed
-        ], style={'display': 'flex', 'flexDirection': 'column',  'alignItems': 'center', 'width': '100%'}),  
-        html.Hr()
-    ], style={
-        'padding': '20px',
-        'background': 'linear-gradient(180deg, #003366 0%, #000033 100%)',
-        'color': '#fff',
-        'borderRadius': '15px',
-        'marginBottom': '20px'
-    })
+
+def create_styled_heading(text, include_search=False, include_extra_text=False):
+    search_box = dbc.Input(
+        id='search-box',
+        type='text',
+        placeholder='Datenbank durchsuchen...',
+        size="lg",
+        className="mb-3"
+    ) if include_search else None
+    
+    extra_text = html.P("im Aufbau befindend", style={'color': '#ff0000', 'fontSize': '20px', 'textAlign': 'center'}) if include_extra_text else None
+
+    return dbc.Card(
+        dbc.CardBody(
+            [
+                html.H1(text, className="card-title text-center", style={'color': '#ffffff'}),
+                search_box,
+                html.H1('Prototyp', className="card-title text-center", style={'color': '#ff0000', 'fontSize': '20px'}),
+                extra_text  # Fügt den zusätzlichen Text mittig hinzu, wenn include_extra_text True ist
+            ]
+        ),
+        className="mb-3",
+        style={
+            'background': 'linear-gradient(180deg, #003366 0%, #000033 100%)',
+            'color': '#fff',
+            'borderRadius': '15px',
+        }
+    )
+
+
+footer = dbc.Container(
+    [
+        dbc.Row(
+            [
+                dbc.Col(
+                        html.Img(src=app.get_asset_url('bmdv_logo.png'), style={'width': 'auto', 'height': '140px', 'marginBottom': '20px'}),
+                        xs=12, sm=12, md=4, lg=4, xl=4,
+                        className="mb-3 d-flex justify-content-center"
+),
+
+                dbc.Col(
+                    [
+                        html.H2('Optimierung des Schienen Datenmanagements', style={'fontWeight': 'bold', 'fontSize': '1.25em'}),
+                        html.P("Funktionsfähiger Prototyp einer Datenbank für die zentrale Bündelung von Infrastruktur-Bestandsdaten", style={'fontSize': '0.9em'}),
+                        html.P("Zielstellung:", style={'fontWeight': 'bold', 'marginTop': '20px'}),
+                        html.Ul([
+                            html.Li("SSOT: Verbesserte Qualitätskontrolle und konsistente Informationen", style={'fontSize': '0.9em'}),
+                            html.Li("Reduzierter Zeitaufwand für Datenabfrage und -verarbeitung", style={'fontSize': '0.9em'}),
+                            html.Li("Transparenz über vorhandene Daten", style={'fontSize': '0.9em'})
+                        ]),
+                        html.P("Verknüpfung diverser Datenquellen in zentraler Datenbank", style={'fontSize': '0.9em'})
+                    ],
+                    xs=12, sm=12, md=4, lg=4, xl=4,
+                    className="mb-3"
+                ),
+                dbc.Col(
+                    [
+                        html.Img(src=app.get_asset_url('infrago_logo.png'), style={'width': '20%', 'marginBottom': '15px'}),
+                        html.Img(src=app.get_asset_url('mobilithek_logo.png'), style={'width': '20%', 'marginBottom': '15px'}),
+                        html.Img(src=app.get_asset_url('EBA-Logo.png'), style={'width': '20%', 'marginBottom': '15px'}),
+                        html.Img(src=app.get_asset_url('openstreetmap_logo.png'), style={'width': '20%', 'marginBottom': '15px'}),
+                        html.Img(src=app.get_asset_url('umweltbundesamt_logo.png'), style={'width': '20%', 'marginBottom': '15px'})
+                    ],
+                    xs=12, sm=12, md=4, lg=4, xl=4,
+                    className="mb-3 d-flex flex-column align-items-center"
+                )
+            ],
+            justify="around"
+        )
+    ],
+    fluid=True,
+    className="footer mt-5",
+    style={'backgroundColor': '#f8f9fa', 'padding': '40px 20px', 'borderTop': '1px solid #dee2e6'}
+)
+
+
+# Navbar
+navbar = dbc.NavbarSimple(
+    brand="Startseite",
+    brand_href="/",
+    color="light",  # Setzt die Navbar auf eine helle (weiße) Farbe
+    dark=False,  # Stellt sicher, dass die Textfarbe nicht automatisch auf weiß gesetzt wird
+    className="mt-4",  # Fügt Abstand oben hinzu
+    style={'backgroundColor': 'white'},  # Stellt sicher, dass die Navbar weiß ist
+    brand_style={'color': '#003366'}  # Dunkelblaue Schriftfarbe für "Demo Anwendung"
+)
 
 
 
 
-# Sidebar with Image, Link, Additional Text, and Logos
-sidebar = html.Div([
-    html.Div([
-        html.Img(src=app.get_asset_url('bmdv_logo.png'), style={'width': '40%', 'display': 'block', 'marginBottom': '40px'}),
-        html.H2('Optimierung des Schienen-Datenmanagements', style={'color': '#000', 'fontWeight': 'bold', 'textAlign': 'center', 'fontSize': '25px'})
-    ], style={'padding': '10px', 'backgroundColor': '#D8D7D7'}),
-    html.Hr(),
-    html.Div([
-        dcc.Link('Startseite', href='/', className='sidebar-link',
-                 style={'display': 'block', 'textAlign': 'center', 'padding': '8px 16px', 'borderRadius': '15px',
-                        'backgroundColor': '#fff', 'color': '#003366', 'margin': '0 auto'}),
-    ], style={'paddingBottom': '20px'}),
-    # Additional bulleted text under the "Startseite" button
-    html.Div([
-        html.P("Funktionsfähiger Prototyp einer Datenbank für die zentrale Bündelung von Infrastruktur-Bestandsdaten",
-               style={'textAlign': 'left', 'marginBottom': '2em'}),
-        html.P("Zielstellung:", style={'textAlign': 'left', 'fontWeight': 'bold'}),
-        html.Ul([
-            html.Li("SSOT: Verbesserte Qualitätskontrolle und konsistente Informationen"),
-            html.Li("Reduzierter Zeitaufwand für Datenabfrage und -verarbeitung"),
-            html.Li("Transparenz über vorhandene Daten")
-        ], style={'textAlign': 'left', 'paddingLeft': '20px', 'marginBottom': '2em'}),
-        html.P("Verknüpfung diverser Datenquellen in zentraler Datenbank:", style={'textAlign': 'left'})
-    ], style={'padding': '10px 0'}),
-    # Logos
-    html.Img(src=app.get_asset_url('infrago_logo.png'), style={'width': '30%', 'marginTop': '10px','display': 'block', 'margin': '0 auto', 'marginBottom': '15px'}),
-    html.Img(src=app.get_asset_url('mobilithek_logo.png'), style={'width': '30%', 'marginTop': '10px', 'display': 'block', 'margin': '0 auto', 'marginBottom': '15px'}),
-    html.Img(src=app.get_asset_url('EBA-Logo.png'), style={'width': '30%', 'marginTop': '10px', 'display': 'block', 'margin': '0 auto', 'marginBottom': '15px'}),
-    html.Img(src=app.get_asset_url('openstreetmap_logo.png'), style={'width': '30%', 'marginTop': '10px', 'display': 'block', 'margin': '0 auto', 'marginBottom': '15px'}),
-    html.Img(src=app.get_asset_url('umweltbundesamt_logo.png'), style={'width': '30%', 'marginTop': '10px', 'display': 'block', 'margin': '0 auto', 'marginBottom': '15px'}),
-], className='sidebar-sticky', style={
-    'padding': '20px',
-    'width': '15%',
-    'background': '#D8D7D7',
-    'position': 'fixed',
-    'height': '100%',
-    'overflow': 'auto',
-    'borderRadius': '15px',  # Add border radius
-    'boxShadow': '2px 2px 3px 3px grey'  # Add box shadow
-})
 
-# App layout
-app.layout = html.Div([
-    dcc.Location(id='url', refresh=False),
-    sidebar,
+# Layout
+app.layout = dbc.Container(
+    [
+        dcc.Location(id='url', refresh=False),
+        navbar,
+        dbc.Row(
+            [
+                dbc.Col(id='page-content', width=12)
+            ]
+        ),
+        footer
+    ],
+    fluid=True,
+)
 
-    # Main content area with adjusted spacing
-    html.Div(id='page-content', style={
-        'marginLeft': '17%',
-        'marginRight': '2%',
-        'paddingTop': '5px',
-        'paddingRight': '2%',
-        'paddingLeft': '2%',
-        'paddingBottom': '20px'
-    })
-], style={'fontFamily': 'sans-serif', 'height': '100vh'})
 
 # Update page content based on URL
 @app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/':
-        return [
-            # Image above the top bar
-            html.Img(src=app.get_asset_url('bild_oben.png'), style={'width': '100%', 'display': 'block', 'marginBottom': '20px'}),
-
-            create_styled_heading('Zentrale Datenbank für Infrastruktur-Bestandsdaten', include_search=True),  # Include the search box
-
-            # Cards Container
-            html.Div(className='container-fluid', children=[
-                html.Div(className='row', children=[
-                    html.Div(create_card('1', 'HLK-Auswertung'), className='col-lg-6 mb-3'),
-                    html.Div(create_card('2', 'Inspektor Infrastruktur-Bestandsdaten'), className='col-lg-6 mb-3'),
-                    html.Div(create_card('3', 'Geo-Visualisierung'), className='col-lg-6 mb-3'),
-                    html.Div(create_card('4', 'Personenbahnhöfe'), className='col-lg-6 mb-3'),
-                ])
-            ])
+        heading = create_styled_heading('Zentrale Datenbank für Infrastruktur-Bestandsdaten', include_search=True)
+        cards = [
+            create_card(str(index + 1), title)
+            for index, title in enumerate(page_descriptions)
         ]
+        return [heading] + [dbc.Row(cards, justify="start")]
     else:
         # Decode the URL component back to the title
         title = urllib.parse.unquote(pathname[1:])
         if title == 'Inspektor Infrastruktur-Bestandsdaten':
+            page_description = page_descriptions[title]
+            page_content = html.P(page_description, className="mb-5")
+            heading = create_styled_heading(title, include_search=False, include_extra_text=(title == "Personenbahnhöfe"))
             return [
-                create_styled_heading(title, include_search=False),
-                dcc.Link('zurück zur Startseite', href='/', style={'color': '#003366'}),
-                html.Div('Hier kann eine kurze Beschreibung stehen.', style={'color': '#003366', 'textAlign': 'center', 'marginBottom': '40px'}),
+                heading, page_content,        
+                html.Div('Strecken-Informationen', style={'color': '#003366', 'textAlign': 'center', 'marginBottom': '40px', 'fontSize': '24px'}),
                 # Eingabefeld für STR_NR-Filter
                 html.Div([
                     html.Label('Filtern Sie die STR_NR:'),
@@ -244,10 +269,10 @@ def display_page(pathname):
                     id='table-df_GSL',
                     columns=[{'name': i, 'id': i} for i in df_GSL.columns],
                     data=df_GSL.head(1).to_dict('records'),
-                    style_table={'overflowX': 'auto', 'height': '200px', 'marginTop': '40px'},  # Festlegen der Höhe mit Scrollbar
+                    style_table={'overflowX': 'auto', 'height': '90px', 'marginTop': '40px'},  # Festlegen der Höhe mit Scrollbar
                     style_data_conditional=[{'if': {'column_id': 'STR_NR'}, 'marginTop': '10px'}]  # Anpassen des Abstands des Sliders
                 ),
-
+                html.Div('Informationen zu Anlagen auf ausgewählter Strecke', style={'color': '#003366', 'textAlign': 'center', 'marginTop': '40px', 'marginBottom': '20px', 'fontSize': '24px'}),
                 html.Div(children='Bitte wählen Sie einen Anlagentyp:', style={'padding': '10px'}),
                 
                 # RadioItems für Datensatz-Auswahl
@@ -255,7 +280,7 @@ def display_page(pathname):
                     id='dataset-radio',
                     options=[
                         {'label': 'Weichen', 'value': 'df_weichen'},
-                        {'label': 'Brücken', 'value': 'df_bruecken'},
+                        {'label': 'Brücken', 'value': 'df_br'},
                         {'label': 'Tunnel', 'value': 'df_tunnel'},
                         {'label': 'Stützbauwerke', 'value': 'df_stuetzbauwerke'},
                         {'label': 'Schallschutzwände', 'value': 'df_schallschutzwande'},
@@ -274,6 +299,115 @@ def display_page(pathname):
                     page_action='native'  # Benutzerdefinierte Seitennavigation
                 ),
                 dcc.Graph(id='graph-content', style={'height': '80vh', 'width': '100%'} )
+            ]
+        if title == 'HLK-Auswertung':
+            page_description = page_descriptions[title]
+            page_content = html.P(page_description, className="mb-5")
+            heading = create_styled_heading(title, include_search=False, include_extra_text=(title == "Personenbahnhöfe"))
+            return [
+                heading, page_content,
+                html.Div('Strecken-Informationen', style={'color': '#003366', 'textAlign': 'center', 'marginBottom': '40px', 'fontSize': '24px'}),
+                # Eingabefeld für STR_NR-Filter
+                html.Div([
+                    html.Label('Wählen Sie einen Hochleistungskorridor (HLK) aus:'),
+                dcc.Dropdown(
+                    id='STR_NR-filter',
+                    options=[
+                        {'label': str(num), 'value': str(num)} for num in hlk_timetable["HLK Name"].unique()
+                    ],
+                    placeholder='Wählen Sie einen HLK aus',
+                    value='Frankfurt - Mannheim',  # Standardwert
+                    clearable=True,  # Option zum Löschen der Auswahl
+                )
+                ], style={'marginBottom': '40px'}),
+
+                # Tabelle für df_GSL
+                DataTable(
+                    id='table-df_GSL',
+                    columns=[{'name': i, 'id': i} for i in df_GSL.columns],
+                    data=df_GSL.head(1).to_dict('records'),
+                    style_table={'overflowX': 'auto', 'height': '90px', 'marginTop': '40px'},  # Festlegen der Höhe mit Scrollbar
+                    style_data_conditional=[{'if': {'column_id': 'STR_NR'}, 'marginTop': '10px'}]  # Anpassen des Abstands des Sliders
+                ),
+                html.Div('Informationen zu Anlagen auf ausgewählter Strecke', style={'color': '#003366', 'textAlign': 'center', 'marginTop': '40px', 'marginBottom': '20px', 'fontSize': '24px'}),
+                html.Div(children='Bitte wählen Sie einen Anlagentyp:', style={'padding': '10px'}),
+                
+                # RadioItems für Datensatz-Auswahl
+                dcc.RadioItems(
+                    id='dataset-radio',
+                    options=[
+                        {'label': 'Weichen', 'value': 'df_weichen'},
+                        {'label': 'Brücken', 'value': 'df_br'},
+                        {'label': 'Tunnel', 'value': 'df_tunnel'},
+                        {'label': 'Stützbauwerke', 'value': 'df_stuetzbauwerke'},
+                        {'label': 'Schallschutzwände', 'value': 'df_schallschutzwande'},
+                        {'label': 'Bahnübergänge', 'value': 'df_bahnubergange'}
+                    ],
+                    value='df_weichen',
+                    labelStyle={'display': 'block'}
+                ),
+                
+                # Tabelle für Datenausgabe
+                DataTable(
+                    id='table-content',
+                    filter_action='native',
+                    style_table={'overflowX': 'auto', 'height': '200px', 'marginTop': '40px'},  # Anpassen des Abstands
+                    page_size=8,  # Anzeigen der obersten 8 Einträge pro Seite
+                    page_action='native'  # Benutzerdefinierte Seitennavigation
+                ),
+                dcc.Graph(id='graph-content', style={'height': '80vh', 'width': '100%'} )
+            ]
+        if title == 'Geo-Visualisierung':
+            page_description = page_descriptions[title]
+            page_content = html.P(page_description, className="mb-5")
+            heading = create_styled_heading(title, include_search=False, include_extra_text=(title == "Personenbahnhöfe"))
+            return [
+                heading, page_content,
+                html.Div('Strecken-Informationen', style={'color': '#003366', 'textAlign': 'center', 'marginBottom': '40px', 'fontSize': '24px'}),
+                # Eingabefeld für STR_NR-Filter
+                html.Div([
+                    html.Label('Filtern Sie die STR_NR:'),
+                    dcc.Input(
+                        id='STR_NR-filter',
+                        type='text',
+                        placeholder='Geben Sie STR_NR ein',
+                        value = '4010'
+                    )
+                ], style={'marginBottom': '40px'}),
+
+                # RadioItems für Datensatz-Auswahl
+                dcc.RadioItems(
+                    id='dataset-radio',
+                    options=[
+                        {'label': 'Weichen', 'value': 'df_weichen'},
+                        {'label': 'Brücken', 'value': 'df_br'},
+                        {'label': 'Tunnel', 'value': 'df_tunnel'},
+                        {'label': 'Stützbauwerke', 'value': 'df_stuetzbauwerke'},
+                        {'label': 'Schallschutzwände', 'value': 'df_schallschutzwande'},
+                        {'label': 'Bahnübergänge', 'value': 'df_bahnubergange'}
+                    ],
+                    value='df_weichen',
+                    labelStyle={'display': 'block'}
+                ),
+                
+                # Tabelle für Datenausgabe
+                DataTable(
+                    id='table-content',
+                    filter_action='native',
+                    style_table={'overflowX': 'auto', 'height': '200px', 'marginTop': '40px'},  # Anpassen des Abstands
+                    page_size=8,  # Anzeigen der obersten 8 Einträge pro Seite
+                    page_action='native'  # Benutzerdefinierte Seitennavigation
+                ),
+                dcc.Graph(id='graph-content', style={'height': '80vh', 'width': '100%'} )
+            ]
+        if title == 'Personenbahnhöfe':
+            page_description = page_descriptions[title]
+            page_content = html.P(page_description, className="mb-5")
+            heading = create_styled_heading(title, include_search=False, include_extra_text=(title == "Personenbahnhöfe"))
+            return [
+                heading, page_content,
+                dcc.Link('zurück zur Startseite', href='/', style={'color': '#003366'}),
+                html.Div('Weitere Darstellungen in Arbeit', style={'color': '#003366', 'textAlign': 'center', 'marginBottom': '40px', 'fontSize': '24px', 'marginTop': '100px'}),
             ]
         else:
             return html.Div([
@@ -298,8 +432,8 @@ def update_table(selected_dataset, STR_NR_filter):
     df = None
     if selected_dataset == 'df_weichen':
         df = df_weichen
-    elif selected_dataset == 'df_bruecken':
-        df = df_bruecken
+    elif selected_dataset == 'df_br':
+        df = df_br
     elif selected_dataset == 'df_tunnel':
         df = df_tunnel
     elif selected_dataset == 'df_stuetzbauwerke':
@@ -396,8 +530,16 @@ def update_table(selected_dataset, STR_NR_filter):
             style='outdoors'
         ),
         showlegend=True,
-        title="Geoplot der DB Bahnübergänge, Brücken und Tunnel"
+        title={
+            'text': "Geoplot der DB Bahnübergänge, Brücken und Tunnel",
+            'font': {'color': '#003366', 'size': 24},
+            'x': 0.5, # Mittig ausrichten
+            'xanchor': 'center', # Ankerpunkt für x-Achse
+            'y': 0.95, # 5% vom oberen Rand der Grafik
+            'yanchor': 'top', # Ankerpunkt für y-Achse
+        }
     )
+
 
     return columns, data, fig
 
