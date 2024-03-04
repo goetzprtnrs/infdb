@@ -636,7 +636,7 @@ def update_table(selected_dataset, STR_NR_filter):
             yanchor="top",
             y=0.99,
             xanchor="right",
-            x=0.01
+            x=0.99
         ),
         title="Geoplot der DB Bahnübergänge, Brücken und Tunnel",
         title_font=dict(color='#003366', size=24),
